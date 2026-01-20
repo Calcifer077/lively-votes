@@ -37,10 +37,11 @@ function ProfilePage() {
             }}
           >
             <Box>
-              <Avatar sx={{ width: 56, height: 56 }}>
-                {/* Profile Info */}
-                <AccountCircleIcon fontSize="large" />
-              </Avatar>
+              {/* Profile Info */}
+              <AccountCircleIcon
+                fontSize="large"
+                sx={{ color: "var(--active-indigo)", width: 56, height: 56 }}
+              />
             </Box>
             <Box>
               <Typography variant="h6">ID, name</Typography>
