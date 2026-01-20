@@ -1,0 +1,60 @@
+import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+// import { rateLimit } from "express-rate-limit";
+// import { slowDown } from "express-slow-down";
+
+import pollRouter from "./routes/pollRoute.js";
+import userRouter from "./routes/userRoutes.js";
+
+const app = express();
+const port = 3000;
+
+// Slow down our server after too many requests
+// const slowDownLimiter = slowDown({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   delayAfter: 5, // Allow 5 requests per 15 minutes.
+//   delayMs: (hits) => hits * 100,
+// });
+
+// Rate limiting our server.
+// right now -> 2 requests per user under 15 minutes
+// const rateLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   limit: 2,
+// });
+
+const allowedOrigins = ["http://localhost:5173"];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "DELETE", "PATCH"],
+  })
+);
+
+app.use(express.json());
+app.use(cookieParser());
+// app.use(slowDownLimiter);
+// app.use(rateLimiter);
+
+app.use("/api/v1/polls", pollRouter);
+app.use("/api/v1/users", userRouter);
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.log("This error was caught by express.");
+  console.log(err);
+
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
+});
+
+app.listen(port, () => {
+  console.log(`App running on port ${port}`);
+});

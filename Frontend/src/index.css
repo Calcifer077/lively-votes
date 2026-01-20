@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --white: oklch(98.5% 0.002 247.839);
+  --light-gray: oklch(96.7% 0.003 264.542);
+  --medium-gray: oklch(44.6% 0.03 256.802);
+  --dark-gray: oklch(27.8% 0.033 256.848);
+  --text-gray: oklch(44.6% 0.03 256.802);
+  --border-gray: oklch(70.7% 0.022 261.325);
+  --hover-indigo: oklch(58.5% 0.233 277.117);
+  --active-indigo: oklch(51.1% 0.262 276.966);
+  --light-purple: oklch(82.7% 0.119 306.383);
+  --lighter-purple: oklch(90.2% 0.063 306.703);
+}
+
+body {
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
