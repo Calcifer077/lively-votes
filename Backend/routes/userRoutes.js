@@ -1,5 +1,10 @@
 import express from "express";
-import { signUp, login, protect } from "../controllers/authController.js";
+import {
+  signUp,
+  login,
+  protect,
+  logout,
+} from "../controllers/authController.js";
 
 import {
   getUserData,
@@ -10,6 +15,7 @@ const router = express();
 
 router.route("/signup").post(signUp);
 router.route("/login").post(login);
+router.route("/logout").get(logout);
 
 router.use(protect);
 

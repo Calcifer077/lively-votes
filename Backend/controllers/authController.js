@@ -195,3 +195,16 @@ export const protect = catchAsync(async function (req, res, next) {
   res.user = userFromDatabase;
   next();
 });
+
+export const logout = catchAsync(async function (req, res, next) {
+  // 1. Reset the cookie
+  res.cookie("jwt", "loggedout");
+
+  res.setHeader("authorization", " ");
+
+  // 2. Send response
+  res.status(200).json({
+    message: "success",
+    token: null,
+  });
+});
