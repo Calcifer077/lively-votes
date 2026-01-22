@@ -51,3 +51,18 @@ export const signupUser = async function (data) {
 
   return null;
 };
+
+export const logoutUser = async function () {
+  localStorage.setItem("jwt", null);
+
+  const res = await AxiosInstance({
+    url: "/users/logout",
+    method: "get",
+  });
+
+  if (res.data.status === "success") {
+    return true;
+  }
+
+  return false;
+};
