@@ -11,3 +11,16 @@ export const getProfileData = async function () {
   }
   return [];
 };
+
+export const getPollsUserHaveVotedIn = async function () {
+  const res = await AxiosInstance({
+    url: "/users/getPollsUserHaveVotedIn",
+    method: "get",
+  });
+
+  if (res.data.status === "success") {
+    return res.data.data;
+  }
+
+  return [];
+};
