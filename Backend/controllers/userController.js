@@ -2,7 +2,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { eq, sql, count } from "drizzle-orm";
 
-import { UsersTable, VoteTable, PollTable } from "../db/schema.js";
+import { UsersTable, VoteTable, PollTable, OptionTable } from "../db/schema.js";
 import catchAsync from "../utils/catchAsync.js";
 
 const db = drizzle(process.env.DATABASE_URL);
@@ -105,36 +105,60 @@ export const getUserData = catchAsync(async function (req, res, next) {
  * format of result:
  * {
  *   status: "success",
- *   data: {
- *     polls: [
- *       {
- *         id: VoteTable.id,
- *         userId: VoteTable.user_id,
- *         pollId: VoteTable.poll_id,
- *         optionId: VoteTable.option_id,
- *         votedAt: VoteTable.voted_at
- *       }
- *     ]
- *   }
+ *   data: [
+ *    {
+ *      pollId: PollTable.id
+ *      question: PollTable.question
+ *      options:
+ *        [
+ *          {
+ *            id: OptionTable.id,
+ *            text: OptionTable.text
+ *          }
+ *        ]
+ *    }
+ * ]
  */
 export const getPollsUserHaveVotedIn = catchAsync(
   async function (req, res, next) {
     // The user is authenticated, we can get his data from res.user
     const userId = res.user.id;
 
+    const dataToReturn = [];
+
+    // Get polls user have voted in
+    // Using orderBy to ensure consistent order
     const pollsUserVotedIn = await db
-      .select({
-        id: VoteTable.id,
-        userId: VoteTable.user_id,
-        pollId: VoteTable.poll_id,
-        optionId: VoteTable.option_id,
-      })
+      .select({ pollId: VoteTable.poll_id })
       .from(VoteTable)
-      .where(eq(VoteTable.user_id, userId));
+      .where(eq(VoteTable.user_id, userId))
+      .orderBy(VoteTable.poll_id);
+
+    for (const poll of pollsUserVotedIn) {
+      // Get poll details
+      const [pollDetails] = await db
+        .select({ pollId: PollTable.id, question: PollTable.question })
+        .from(PollTable)
+        .where(eq(PollTable.id, poll.pollId));
+
+      // Get options for this poll
+      // Using order by to ensure options are in consistent order
+      const optionsForThisPoll = await db
+        .select({ id: OptionTable.id, text: OptionTable.text })
+        .from(OptionTable)
+        .where(eq(OptionTable.poll_id, pollDetails.pollId))
+        .orderBy(OptionTable.id);
+
+      // Combine poll details and options
+      dataToReturn.push({
+        ...pollDetails,
+        options: optionsForThisPoll,
+      });
+    }
 
     res.status(200).json({
       status: "success",
-      data: { polls: pollsUserVotedIn },
+      data: { data: dataToReturn },
     });
   },
 );
