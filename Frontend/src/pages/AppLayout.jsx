@@ -1,14 +1,22 @@
-import { Outlet, Navigate } from "react-router";
+import { Outlet, useNavigate } from "react-router";
+import { useEffect } from "react";
 
 import Navbar from "../components/Navbar";
-// import { useAuth } from "../features/authentication/AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 
 function AppLayout() {
-  // const { userId, userEmail } = useAuth();
+  const { userId, jwt, email } = useAuthContext();
 
-  // if (!userId || !userEmail) {
-  //   return <Navigate to="/signup" />;
-  // }
+  const navigate = useNavigate();
+
+  const isAuthenticated = Boolean(userId && jwt && email);
+
+  useEffect(() => {
+    // Redirect to signup if not authenticated
+    if (!isAuthenticated) {
+      navigate("/signup");
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div>
