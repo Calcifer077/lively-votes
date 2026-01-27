@@ -1,5 +1,5 @@
-import { BrowserRouter, Route, Routes } from "react-router";
 import { useEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -15,11 +15,11 @@ import ProfilePage from "./pages/ProfilePage";
 import { AuthProvider } from "./context/AuthContext";
 
 import { socket } from "./features/socket/socket";
+import { useSocketInvalidation } from "./features/socket/useSocketInvalidation";
 
 const queryClient = new QueryClient();
 
-function App() {
-  // create a socket connection on first app mounting.
+export default function App() {
   useEffect(() => {
     socket.connect();
 
@@ -48,6 +48,8 @@ function App() {
 
         <div className="relative z-10">
           <QueryClientProvider client={queryClient}>
+            <SocketQueryInvalidation />
+
             {/* Change below to create browser router */}
             <BrowserRouter>
               {/* For Authentication */}
@@ -76,4 +78,8 @@ function App() {
   );
 }
 
-export default App;
+function SocketQueryInvalidation() {
+  useSocketInvalidation();
+
+  return null;
+}
