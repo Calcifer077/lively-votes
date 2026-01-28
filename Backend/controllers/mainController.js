@@ -10,6 +10,7 @@ import { io } from "../app.js";
 const db = drizzle(process.env.DATABASE_URL);
 
 /**
+ * It returns all polls regardless of any condition.
  * what it returns
  * data: [
  *  {
@@ -92,6 +93,7 @@ export const getAllPolls = catchAsync(async function (req, res, next) {
   });
 });
 
+// Creats a new poll, user should be authenticated for this to work
 export const createPoll = catchAsync(async function (req, res, next) {
   // 1. Get data from req.body
   // What we need, question, userid, options (will be a array)
@@ -178,7 +180,7 @@ async function createVote(vote) {
   }
 }
 
-// creates new vote in the database
+// creates new vote in the database, user should be authenticated for this.
 export const castVote = catchAsync(async function (req, res, next) {
   // 1. Get data from req body
   // what we need, userId, pollId, optionId
@@ -375,10 +377,10 @@ export const countVotes = catchAsync(async function (req, res, next) {
   });
 });
 
+// returns the option which is voted by the current user for a particular poll.
+// user is required to be authenticated for this to work.
 export const whichOptionVoted = catchAsync(async function (req, res, next) {
   const { pollId } = req.params;
-
-  // console.log("route hit", pollId);
 
   // The user is authenticated
   const userId = res.user.id;
