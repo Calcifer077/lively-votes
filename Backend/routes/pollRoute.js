@@ -12,10 +12,10 @@ import { protect } from "../controllers/authController.js";
 
 const router = express();
 
+router.use(protect);
+
 router.route("/").get(getAllPolls);
 router.route("/getPollsWithPagination/:page").get(getPollsWithPagination);
-
-router.use(protect);
 
 router.route("/").post(createPoll);
 
