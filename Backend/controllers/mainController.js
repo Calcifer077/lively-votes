@@ -9,6 +9,16 @@ import { io } from "../app.js";
 
 const db = drizzle(process.env.DATABASE_URL);
 
+let totalRowsInPollTable;
+
+const init = async function () {
+  // calculate total number of rows in poll table, is used in pagination function
+  const [res] = await db.select({ count: count() }).from(PollTable);
+  totalRowsInPollTable = res;
+};
+
+init();
+
 /**
  * It returns all polls regardless of any condition.
  * what it returns
@@ -99,7 +109,7 @@ export const getPollsWithPagination = catchAsync(
     let data = [];
 
     const page = req.params.page;
-    const numberOfPagesPerRes = 10;
+    const numberOfRowsPerRes = 9;
 
     // will store all the PollTable.id inside it which we have fetched.
     const pollIds = [];
@@ -113,8 +123,8 @@ export const getPollsWithPagination = catchAsync(
       })
       .from(PollTable)
       .orderBy(asc(PollTable.id))
-      .limit(numberOfPagesPerRes)
-      .offset((page - 1) * numberOfPagesPerRes);
+      .limit(numberOfRowsPerRes)
+      .offset((page - 1) * numberOfRowsPerRes);
 
     data = [...polls];
 
@@ -159,8 +169,11 @@ export const getPollsWithPagination = catchAsync(
 
     res.status(200).json({
       status: "success",
-      length: data.length,
       data: data,
+      page: page,
+      rowsPerPage: numberOfRowsPerRes,
+      totalRows: totalRowsInPollTable,
+      totalPages: Math.ceil(totalRowsInPollTable.count / numberOfRowsPerRes),
     });
   },
 );
