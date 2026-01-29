@@ -9,6 +9,19 @@ export const getAllPolls = async function () {
   return res.data;
 };
 
+export const getPollsWithPagination = async function ({ pageParam = 1 }) {
+  const res = await AxiosInstance({
+    url: `/polls/getPollsWithPagination/${pageParam}`,
+    method: "get",
+  });
+
+  if (res.data.status === "success") {
+    return res.data;
+  }
+
+  return null;
+};
+
 export const createPoll = async function (data) {
   const { question, options } = data;
 
