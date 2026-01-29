@@ -5,6 +5,7 @@ import {
   countVotes,
   createPoll,
   getAllPolls,
+  getPollsWithPagination,
   whichOptionVoted,
 } from "../controllers/mainController.js";
 import { protect } from "../controllers/authController.js";
@@ -12,6 +13,7 @@ import { protect } from "../controllers/authController.js";
 const router = express();
 
 router.route("/").get(getAllPolls);
+router.route("/getPollsWithPagination/:page").get(getPollsWithPagination);
 
 router.use(protect);
 

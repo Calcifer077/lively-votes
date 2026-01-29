@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { eq, and, count, sql } from "drizzle-orm";
+import { eq, and, count, sql, asc, inArray } from "drizzle-orm";
 
 import { OptionTable, PollTable, UsersTable, VoteTable } from "../db/schema.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -92,6 +92,78 @@ export const getAllPolls = catchAsync(async function (req, res, next) {
     data: data,
   });
 });
+
+export const getPollsWithPagination = catchAsync(
+  async function (req, res, next) {
+    // data to be returned.
+    let data = [];
+
+    const page = req.params.page;
+    const numberOfPagesPerRes = 10;
+
+    // will store all the PollTable.id inside it which we have fetched.
+    const pollIds = [];
+
+    // 1. get Polls
+    const polls = await db
+      .select({
+        id: PollTable.id,
+        question: PollTable.question,
+        user_id: PollTable.user_id,
+      })
+      .from(PollTable)
+      .orderBy(asc(PollTable.id))
+      .limit(numberOfPagesPerRes)
+      .offset((page - 1) * numberOfPagesPerRes);
+
+    data = [...polls];
+
+    // 2. Get the user that created polls found in above step
+    for (const el of data) {
+      const user = await db
+        .select({
+          id: UsersTable.id,
+          email: UsersTable.email,
+        })
+        .from(UsersTable)
+        .where(eq(UsersTable.id, el.user_id));
+
+      el.user = user;
+      el.options = [];
+      pollIds.push(el.id);
+    }
+
+    // 3. Get options for above polls
+    // this will contain all the options for the polls which we fetched in the above step.
+    const optionsForAllPollsInAboveStep = await db
+      .select({
+        id: OptionTable.id,
+        text: OptionTable.text,
+        poll_id: OptionTable.poll_id,
+      })
+      .from(OptionTable)
+      // will return those polls who have their poll_ids present in the pollIds array.
+      .where(inArray(OptionTable.poll_id, pollIds));
+
+    // go one by one through each option and push them into their respective polls.
+    optionsForAllPollsInAboveStep.map((el) => {
+      // find the poll into which we will push it.
+      const pollToBeUpdated = data.find((item) => item.id === el.poll_id);
+
+      // if that poll exist
+      if (pollToBeUpdated) {
+        // push this option into that polls option array.
+        pollToBeUpdated.options.push(el);
+      }
+    });
+
+    res.status(200).json({
+      status: "success",
+      length: data.length,
+      data: data,
+    });
+  },
+);
 
 // Creats a new poll, user should be authenticated for this to work
 export const createPoll = catchAsync(async function (req, res, next) {
