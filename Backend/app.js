@@ -13,7 +13,7 @@ const app = express();
 const httpServer = createServer(app);
 
 const allowedOrigins = [
-  "https://lively-votes-gcdm2ih6c-maheshs-projects-0091caae.vercel.app/",
+  "https://lively-votes-gcdm2ih6c-maheshs-projects-0091caae.vercel.app",
 ];
 
 export const io = new Server(httpServer, {
