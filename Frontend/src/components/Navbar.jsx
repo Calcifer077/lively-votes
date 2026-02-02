@@ -46,7 +46,6 @@ export default function ButtonAppBar() {
                 All Polls
               </NavbarButton>
             )}
-            {userId && <NavbarButton>My Votes</NavbarButton>}
             {userId && (
               <NavbarButton onClick={() => navigate("/createPoll")}>
                 Create Poll
