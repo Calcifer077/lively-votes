@@ -512,7 +512,7 @@ export const countVotes = catchAsync(async function (req, res, next) {
   const { pollId } = req.params;
 
   // This user is authenticated
-  const userId = req.user.id;
+  const userId = res.user.id;
 
   const [userFromDatabase] = await db
     .select()
