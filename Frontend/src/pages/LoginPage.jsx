@@ -3,7 +3,7 @@ import { Box, Button, Typography, Link, Paper } from "@mui/material";
 import TextField from "../ui/TextField";
 import { useNavigate } from "react-router";
 import { useAuthContextDispatch } from "../context/AuthContext";
-import { useLogin } from "../features/authentication/useLogin.js";
+import { useLogin } from "../hooks/authentication/useLogin.js";
 
 export default function LoginPage() {
   // for navigation

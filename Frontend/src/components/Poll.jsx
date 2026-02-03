@@ -6,9 +6,9 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import DoneIcon from "@mui/icons-material/Done";
 
-import { useCastVote } from "../features/polls/useCastVote";
-import { useWhichOptionVoted } from "../features/polls/useWhichOptionVoted";
-import { useCountVotesForPoll } from "../features/polls/useCountVotesForPoll";
+import { useCastVote } from "../hooks/polls/useCastVote";
+import { useWhichOptionVoted } from "../hooks/polls/useWhichOptionVoted";
+import { useCountVotesForPoll } from "../hooks/polls/useCountVotesForPoll";
 import { CircularProgress } from "@mui/material";
 
 function Poll({ question, options, byMe, pollId }) {

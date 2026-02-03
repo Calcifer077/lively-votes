@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { socket } from "./socket";
+import { socket } from "../../services/socket";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function useSocketInvalidation() {

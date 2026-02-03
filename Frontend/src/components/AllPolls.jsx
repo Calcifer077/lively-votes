@@ -9,7 +9,7 @@ import { Button } from "@mui/material";
 import Poll from "./Poll";
 // import { getAllPolls } from "../services/apiPolls";
 import { useAuthContext } from "../context/AuthContext";
-import { useGetPollsWithPagination } from "../features/polls/useGetPollsWithPagination";
+import { useGetPollsWithPagination } from "../hooks/polls/useGetPollsWithPagination";
 
 function AllPolls() {
   // getting the currently logged in user

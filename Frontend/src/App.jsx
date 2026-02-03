@@ -14,8 +14,8 @@ import ProfilePage from "./pages/ProfilePage";
 
 import { AuthProvider } from "./context/AuthContext";
 
-import { socket } from "./features/socket/socket";
-import { useSocketInvalidation } from "./features/socket/useSocketInvalidation";
+import { socket } from "./services/socket";
+import { useSocketInvalidation } from "./hooks/socket/useSocketInvalidation";
 
 const queryClient = new QueryClient();
 

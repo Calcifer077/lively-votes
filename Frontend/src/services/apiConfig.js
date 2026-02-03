@@ -8,8 +8,6 @@ if (import.meta.env.DEV) {
   BASEURL = import.meta.env.VITE_URL_WHEN_PROD;
 }
 
-console.log(BASEURL);
-
 const AxiosInstance = axios.create({
   baseURL: BASEURL + "/api/v1",
   withCredentials: true,
