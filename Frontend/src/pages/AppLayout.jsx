@@ -21,7 +21,7 @@ function AppLayout() {
         navigate("/signup", { replace: true });
       }
     }
-  }, [isAuthenticated, navigate, location.pathname]);
+  }, [isAuthenticated, navigate]);
 
   return (
     <div>
