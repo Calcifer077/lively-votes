@@ -4,6 +4,7 @@ import {
   login,
   protect,
   logout,
+  refresh,
 } from "../controllers/authController.js";
 
 import {
@@ -16,6 +17,7 @@ const router = express();
 router.route("/signup").post(signUp);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
+router.route("/refresh").get(refresh);
 
 router.use(protect);
 

@@ -77,6 +77,12 @@ app.use((err, req, res, next) => {
   console.log("This error was caught by express.");
   console.log(err);
 
+  // In case of expired token, return a 401
+  // Axios on frontend will intercept this and try to refresh the token.
+  if (err.name === "TokenExpiredError") {
+    return res.status(401).json({ error: "Access token expired" });
+  }
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 

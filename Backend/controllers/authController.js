@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 
 import { UsersTable } from "../db/schema.js";
@@ -10,33 +10,86 @@ import AppError from "../utils/appError.js";
 
 const db = drizzle(process.env.DATABASE_URL);
 
-const secretKey = process.env.JWT_SECRET;
+const accessTokenSecretKey = process.env.JWT_SECRET_ACCESS_TOKEN;
+const accessTokenExpiresIn = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN;
+const refreshTokenSecretKey = process.env.JWT_SECRET_REFRESH_TOKEN;
+const refreshTokenExpiresIn = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN;
 
-// Will create a jwt token and return it.
-function createAndSendToken(payload, res) {
+// will create access token and returns it.
+function createAcessToken(payload) {
   const options = {
-    // 2 days
-    expiresIn: Number(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000,
+    expiresIn: Number(accessTokenExpiresIn) * 60 * 1000,
   };
 
-  const token = jwt.sign(payload, secretKey, options);
+  const token = jwt.sign(payload, accessTokenSecretKey, options);
 
-  const cookieOption = {
-    expires: new Date(
-      Date.now() + Number(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000,
-    ),
-    httpOnly: true,
-  };
+  // const cookieOption = {
+  //   expires: new Date(
+  //     Date.now() + Number(accessTokenExpiresIn) * 24 * 60 * 60 * 1000,
+  //   ),
+  //   httpOnly: true,
+  // };
 
   return token;
 }
 
-// will verify the token, and return the object that was used for creating the token.
-function verifyToken(token) {
-  const res = jwt.verify(token, secretKey);
+// will create refresh token, set it as cookie and return it
+function createRefreshToken(payload, res) {
+  const options = {
+    expiresIn: Number(refreshTokenExpiresIn) * 24 * 60 * 60 * 1000,
+  };
+
+  const token = jwt.sign(payload, refreshTokenSecretKey, options);
+
+  const cookieOption = {
+    expires: new Date(
+      Date.now() + Number(refreshTokenExpiresIn) * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true,
+  };
+
+  res.cookie("refreshToken", token, cookieOption);
+
+  return token;
+}
+
+// function createAndSendToken(payload, res) {
+//   const options = {
+//     // 2 days
+//     expiresIn: Number(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000,
+//   };
+
+//   const token = jwt.sign(payload, secretKey, options);
+
+//   const cookieOption = {
+//     expires: new Date(
+//       Date.now() + Number(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 * 1000,
+//     ),
+//     httpOnly: true,
+//   };
+
+//   return token;
+// }
+
+// To verify access token
+function verfiyAcessToken(token) {
+  const res = jwt.verify(token, accessTokenSecretKey);
 
   return res;
 }
+
+// Verify refresh token
+function verfiyRefreshToken(token) {
+  const res = jwt.verify(token, refreshTokenSecretKey);
+
+  return res;
+}
+
+// function verifyToken(token) {
+//   const res = jwt.verify(token, secretKey);
+
+//   return res;
+// }
 
 function validateEmail(email) {
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -95,11 +148,14 @@ export const signUp = catchAsync(async function (req, res, next) {
   };
 
   // 3. Create a jwt and send with the request
-  const token = createAndSendToken(payloadForToken, res);
+  // const token = createAndSendToken(payloadForToken, res);
+  const accessToken = createAcessToken(payloadForToken);
+  const refreshToken = createRefreshToken(payloadForToken, res);
 
   res.status(201).json({
     status: "success",
-    token,
+    accessToken,
+    refreshToken,
     data: {
       user: userThatWasCreated,
     },
@@ -149,17 +205,71 @@ export const login = catchAsync(async function (req, res, next) {
   };
 
   // 3. Create a jwt and send with the request
-  const token = createAndSendToken(payloadForToken, res);
+  // const token = createAndSendToken(payloadForToken, res);
+  const accessToken = createAcessToken(payloadForToken);
+  const refreshToken = createRefreshToken(payloadForToken, res);
 
   res.status(200).json({
     status: "success",
-    token,
+    accessToken,
+    refreshToken,
     data: {
       user: userFromDatabase,
     },
   });
 });
 
+// This controller is for refresh token
+// Will be called when their is unauthorized access to the app.
+// It will first verify the user from refresh token, which is stored in cookies.
+// Try to find a user using this refresh token, if the user is found.
+// Send new access and refresh token
+export const refresh = catchAsync(async function (req, res, next) {
+  let token;
+
+  if (req.cookies.refreshToken) {
+    token = req.cookies.refreshToken;
+  }
+
+  // There is no token present.
+  if (!token) {
+    return next(new AppError("You are not logged in. Please log in.", 401));
+  }
+
+  // 2. verify token
+  const decoded = verfiyRefreshToken(token);
+
+  const [userFromDatabase] = await db
+    .select({
+      id: UsersTable.id,
+      email: UsersTable.email,
+    })
+    .from(UsersTable)
+    .where(eq(UsersTable.id, decoded.id));
+
+  if (!userFromDatabase) {
+    return next(new AppError("Something went wrong. Please login again.", 401));
+  }
+
+  // get new access and refresh token
+  const payloadForToken = {
+    id: userFromDatabase.id,
+    email: userFromDatabase.email,
+  };
+
+  // Create new access and refresh token
+  const accessToken = createAcessToken(payloadForToken);
+  const refreshToken = createRefreshToken(payloadForToken, res);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      accessToken: accessToken,
+    },
+  });
+});
+
+// this will rely on refresh token
 export const protect = catchAsync(async function (req, res, next) {
   // 1. get the token
   let token;
@@ -177,7 +287,7 @@ export const protect = catchAsync(async function (req, res, next) {
   }
 
   // 2. verify token
-  const decoded = verifyToken(token);
+  const decoded = verfiyAcessToken(token);
 
   const [userFromDatabase] = await db
     .select({
