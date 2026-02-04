@@ -205,14 +205,14 @@ export const login = catchAsync(async function (req, res, next) {
   };
 
   // 3. Create a jwt and send with the request
-  // const token = createAndSendToken(payloadForToken, res);
+  // Will create access token and send it with response
   const accessToken = createAcessToken(payloadForToken);
-  const refreshToken = createRefreshToken(payloadForToken, res);
+  // Will create refresh token and set it as cookie
+  createRefreshToken(payloadForToken, res);
 
   res.status(200).json({
     status: "success",
     accessToken,
-    refreshToken,
     data: {
       user: userFromDatabase,
     },
@@ -258,13 +258,16 @@ export const refresh = catchAsync(async function (req, res, next) {
   };
 
   // Create new access and refresh token
+  // Will create access token and send it with response
   const accessToken = createAcessToken(payloadForToken);
-  const refreshToken = createRefreshToken(payloadForToken, res);
+  // Will create refresh token and set it as cookie
+  createRefreshToken(payloadForToken, res);
 
   res.status(200).json({
     status: "success",
+    accessToken,
     data: {
-      accessToken: accessToken,
+      user: userFromDatabase,
     },
   });
 });
