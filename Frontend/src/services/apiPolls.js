@@ -101,3 +101,17 @@ export const countVotesForPoll = async function (axiosInstance, pollId) {
 
   return [];
 };
+
+export const getPollById = async function (axiosInstance, pollId) {
+  const res = await axiosInstance({
+    url: `/polls/getPollById/${pollId}`,
+    method: "get",
+  });
+
+  if (res.data.status === "success") {
+    console.log(res);
+    return res.data.data;
+  }
+
+  return null;
+};
