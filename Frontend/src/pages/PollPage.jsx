@@ -1,6 +1,8 @@
 import { css } from "@emotion/css";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import toast from "react-hot-toast";
+
 import { useGetPollById } from "../hooks/polls/useGetPollById";
 
 function PollPage() {
@@ -17,6 +19,17 @@ function PollPage() {
   const overlayWidths = totalVotes
     ? pollData?.options.map((el) => (el.voteCount / totalVotes) * 100)
     : pollData?.options.map(() => 0);
+
+  // handles sharing of poll, just copies the link to clipboard.
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Something wen twrong. Please try again.");
+    }
+  }
 
   return (
     <div
@@ -155,6 +168,7 @@ function PollPage() {
           },
           transition: "all 2s ease",
         }}
+        onClick={handleShare}
       >
         <Button
           variant="outlined"
