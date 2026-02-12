@@ -612,3 +612,129 @@ export const whichOptionVoted = catchAsync(async function (req, res, next) {
     data: { optionId: 0 },
   });
 });
+
+/**
+ * Returns details of a poll using its pollId
+ * This will return a poll object with options array
+ * It needs pollId from req.params to work
+ * What it returns
+ * {
+ *  poll:{
+ *    id: poll id same as params,
+ *    question:,
+ *    userId:,
+ *    an array of options
+ *    options: [
+ *      {
+ *        id: option id,
+ *        text: text of option,
+ *        voteCount: number of votes
+ *      }
+ *    ]
+ *  },
+ * }
+ */
+// Version - 1
+// export const getPollbyId = catchAsync(async function (req, res, next) {
+//   const { pollId } = req.params;
+
+//   let dataToReturn = {};
+
+//   // get poll
+//   const [pollFromDatabase] = await db
+//     .select({
+//       id: PollTable.id,
+//       question: PollTable.question,
+//       userId: PollTable.user_id,
+//     })
+//     .from(PollTable)
+//     .where(eq(PollTable.id, pollId));
+
+//   if (!pollFromDatabase) {
+//     return next(new AppError("No Poll found with this ID", 404));
+//   }
+
+//   dataToReturn.poll = pollFromDatabase;
+
+//   // get options
+//   const options = await db
+//     .select({
+//       id: OptionTable.id,
+//       text: OptionTable.text,
+//     })
+//     .from(OptionTable)
+//     .where(eq(OptionTable.poll_id, pollId));
+
+//   dataToReturn.options = [];
+
+//   for (const el of options) {
+//     const option = {
+//       ...el,
+//       voteCount: 0,
+//     };
+//     dataToReturn.options.push(option);
+//   }
+
+//   // get votes
+//   const votes = await db
+//     .select({
+//       id: VoteTable.id,
+//       userId: VoteTable.user_id,
+//       optionId: VoteTable.option_id,
+//     })
+//     .from(VoteTable)
+//     .where(eq(VoteTable.poll_id, pollId));
+
+//   for (const vote of votes) {
+//     for (const option of dataToReturn.options) {
+//       if (option.id === vote.optionId) {
+//         option.voteCount += 1;
+//       }
+//     }
+//   }
+
+//   res.status(200).json({
+//     status: "success",
+//     data: dataToReturn,
+//   });
+// });
+
+// Version - 2
+export const getPollbyId = catchAsync(async function (req, res, next) {
+  const { pollId } = req.params;
+
+  // 1. Fetch Poll and Options with Vote Counts in a single logical flow
+  // We use a Left Join so we get options even if they have 0 votes
+  const pollData = await db
+    .select({
+      id: OptionTable.id,
+      text: OptionTable.text,
+      voteCount: sql`count(${VoteTable.id})`.mapWith(Number),
+    })
+    .from(OptionTable)
+    .leftJoin(VoteTable, eq(OptionTable.id, VoteTable.option_id))
+    .where(eq(OptionTable.poll_id, pollId))
+    .groupBy(OptionTable.id);
+
+  // 2. Fetch Poll Details
+  const [poll] = await db
+    .select({
+      id: PollTable.id,
+      question: PollTable.question,
+      userId: PollTable.user_id,
+    })
+    .from(PollTable)
+    .where(eq(PollTable.id, pollId));
+
+  if (!poll) {
+    return next(new AppError("No Poll found with this ID", 404)); // Changed to 404 Not Found
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      poll,
+      options: pollData,
+    },
+  });
+});

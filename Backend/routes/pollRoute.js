@@ -5,12 +5,15 @@ import {
   countVotes,
   createPoll,
   getAllPolls,
+  getPollbyId,
   getPollsWithPagination,
   whichOptionVoted,
 } from "../controllers/mainController.js";
 import { protect } from "../controllers/authController.js";
 
 const router = express();
+
+router.route("/getPollById/:pollId").get(getPollbyId);
 
 router.use(protect);
 
