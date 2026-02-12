@@ -11,6 +11,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import AppLayout from "./pages/AppLayout";
 import ProfilePage from "./pages/ProfilePage";
+import PollPage from "./pages/PollPage";
 
 import { AuthProvider } from "./context/AuthContext";
 
@@ -60,6 +61,9 @@ export default function App() {
                   <Route path="/" element={<AppLayout />}>
                     <Route index element={<AllPolls />} />
                     <Route path="/createPoll" element={<CreatePoll />} />
+
+                    <Route path="/poll/:pollId" element={<PollPage />} />
+
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
