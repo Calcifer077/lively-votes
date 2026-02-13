@@ -183,11 +183,12 @@ function ProfilePage() {
             {pollsUserHaveVotedIn?.map((el) => (
               <Grid size={5}>
                 <Poll
-                  question={el.question}
+                  poll={el}
                   options={el.options}
                   byMe={userId && el.user_id === userId}
                   pollId={el.pollId}
                   key={el.pollId}
+                  isLoggedIn={true}
                 ></Poll>
               </Grid>
             ))}

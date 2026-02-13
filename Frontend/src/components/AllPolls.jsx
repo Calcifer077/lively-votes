@@ -91,11 +91,12 @@ function AllPolls() {
           page?.data.map((el) => (
             <Grid size={5}>
               <Poll
-                question={el.question}
+                poll={el}
                 options={el.options}
                 key={el.id}
                 byMe={userId && el.user_id === userId}
                 pollId={el.id}
+                isLoggedIn={true}
               ></Poll>
             </Grid>
           )),
