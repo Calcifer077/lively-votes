@@ -56,8 +56,6 @@ export default function App() {
               {/* For Authentication */}
               <AuthProvider>
                 <Routes>
-                  {/* <Route path="login" element={<LoginPage />} /> */}
-                  {/* <Route path="signup" element={<SignupPage />} /> */}
                   <Route path="/" element={<AppLayout />}>
                     <Route index element={<AllPolls />} />
                     <Route path="/createPoll" element={<CreatePoll />} />
