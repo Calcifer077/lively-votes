@@ -511,17 +511,17 @@ export const castVote = catchAsync(async function (req, res, next) {
 export const countVotes = catchAsync(async function (req, res, next) {
   const { pollId } = req.params;
 
-  // This user is authenticated
-  const userId = res.user.id;
+  // // This user is authenticated
+  // const userId = res.user.id;
 
-  const [userFromDatabase] = await db
-    .select()
-    .from(UsersTable)
-    .where(eq(UsersTable.id, userId));
+  // const [userFromDatabase] = await db
+  //   .select()
+  //   .from(UsersTable)
+  //   .where(eq(UsersTable.id, userId));
 
-  if (!userFromDatabase) {
-    return next(new AppError("No User found with this ID", 401));
-  }
+  // if (!userFromDatabase) {
+  //   return next(new AppError("No User found with this ID", 401));
+  // }
 
   // 1. Join OptionTable with VoteTable and count occurrences in one go
   const results = await db

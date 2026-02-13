@@ -14,6 +14,7 @@ import { protect } from "../controllers/authController.js";
 const router = express();
 
 router.route("/getPollById/:pollId").get(getPollbyId);
+router.route("/countVotes/:pollId").get(countVotes);
 
 router.use(protect);
 
@@ -23,7 +24,6 @@ router.route("/getPollsWithPagination/:page").get(getPollsWithPagination);
 router.route("/").post(createPoll);
 
 router.route("/castVote").post(castVote);
-router.route("/countVotes/:pollId").get(countVotes);
 router.route("/whichOptionVoted/:pollId").get(whichOptionVoted);
 
 export default router;
