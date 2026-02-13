@@ -16,7 +16,8 @@ function AppLayout() {
       // Only redirect if we're NOT already on an auth page
       if (
         !location.pathname.startsWith("/signup") &&
-        !location.pathname.startsWith("/login")
+        !location.pathname.startsWith("/login") &&
+        !location.pathname.startsWith("/poll")
       ) {
         navigate("/signup", { replace: true });
       }
