@@ -1,24 +1,58 @@
 import { css } from "@emotion/css";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import DoneIcon from "@mui/icons-material/Done";
 import toast from "react-hot-toast";
 
+import { useAuthContext } from "../context/AuthContext";
 import { useGetPollById } from "../hooks/polls/useGetPollById";
+import { useCastVote } from "../hooks/polls/useCastVote";
+import { useWhichOptionVoted } from "../hooks/polls/useWhichOptionVoted";
+import { useAxiosPrivate } from "../hooks/axios/useAxiosPrivate";
+import { useCountVotesForPoll } from "../hooks/polls/useCountVotesForPoll";
+import { useParams } from "react-router";
 
 function PollPage() {
+  // To have the functionality of cast vote.
+  const axiosInstance = useAxiosPrivate();
+  // To check if the user is logged in or not.
+  const { userId } = useAuthContext();
+  // To get poll data, pollId will be passed as a query param, meaning custom hook will get it in its own function through url
   const { data: pollData, isLoading: isLoadingPollData } = useGetPollById();
+  const { pollId } = useParams();
 
-  const showProgress = true;
+  // the user can only vote if he is logged in
+  const isLoggedIn = !!userId;
 
-  const totalVotes = pollData?.options.reduce(
+  const toolTipTitle = isLoggedIn ? "" : "Login to vote";
+
+  // function to cast vote
+  const { castVote } = useCastVote();
+  // get which option has been voted by user.
+  const { optionId, isLoadingOptionId } = useWhichOptionVoted(pollId);
+
+  const { optionsWithVoteCount, isLoadingOptionWithVoteCount } =
+    useCountVotesForPoll(pollId);
+
+  // When to show progress, when the user is not logged in, user have voted on this poll, or the poll was created by the currently logged in user.
+  const showProgress =
+    !isLoggedIn || optionId !== 0 || pollData?.poll.userId === userId;
+  const byMe = pollData?.poll.userId === userId;
+
+  const totalVotes = optionsWithVoteCount.reduce(
     (acc, curr) => acc + curr.voteCount,
     0,
   );
 
-  // If total votes exist than calculate percentage of each option, else it will be just 0.
   const overlayWidths = totalVotes
-    ? pollData?.options.map((el) => (el.voteCount / totalVotes) * 100)
-    : pollData?.options.map(() => 0);
+    ? optionsWithVoteCount.map((el) => (el.voteCount / totalVotes) * 100)
+    : (pollData?.options.map(() => 0) ?? []);
 
   // handles sharing of poll, just copies the link to clipboard.
   async function handleShare() {
@@ -29,6 +63,11 @@ function PollPage() {
       console.error(err);
       toast.error("Something wen twrong. Please try again.");
     }
+  }
+
+  // Responsible for handling of the casting of vote
+  async function handleClick(optionId) {
+    await castVote({ axiosInstance, pollId, optionId });
   }
 
   return (
@@ -99,50 +138,62 @@ function PollPage() {
                     width: 100%;
                   `}
                 >
-                  <Button
-                    key={index}
-                    sx={{
-                      display: "block",
-                      position: "absolute",
-                      width: `${overlayWidths[index] || 0}%`,
-                      height: "100%",
-                      top: 0,
-                      left: 0,
-                      zIndex: 0,
-                      backgroundColor: "var(--lighter-purple)",
-                    }}
-                  ></Button>
+                  {/* 'Tooltip' doesn't work on disabled buttons, becuase mui sets 'pointer-events: none' */}
+                  <Tooltip title={toolTipTitle} arrow>
+                    <span>
+                      <Button
+                        key={index}
+                        disabled={!isLoggedIn}
+                        sx={{
+                          display: showProgress ? "block" : "none",
+                          position: "absolute",
+                          width: `${overlayWidths[index] || 0}%`,
+                          height: "100%",
+                          top: 0,
+                          left: 0,
+                          zIndex: 0,
+                          backgroundColor: "var(--lighter-purple)",
+                        }}
+                      ></Button>
 
-                  <Button
-                    variant="outlined"
-                    // disabled={byMe || isLoadingOptionId || el.id === optionId}
-                    // startIcon={el.id === optionId ? <DoneIcon /> : null}
-                    key={el.id}
-                    // onClick={() => handleClick(el.id)}
-                    sx={{
-                      width: "100%",
-                      borderColor: "var(--lighter-purple)",
-                      color: "var(--text-gray)",
-                      textTransform: "capitalize",
-                      position: "relative",
-                      zIndex: 1,
-                      // Below is needed to change position of text inside button as MUI button uses inline-flex as display. If you don't use it will just display it in the center.
-                      // justifyContent: "flex-start",
-                    }}
-                  >
-                    {el.text}
-
-                    {showProgress && (
-                      <span
-                        className={css`
-                          position: absolute;
-                          right: 10px;
-                        `}
+                      <Button
+                        variant="outlined"
+                        disabled={
+                          !isLoggedIn ||
+                          byMe ||
+                          el.id === optionId ||
+                          isLoadingOptionId ||
+                          isLoadingOptionWithVoteCount
+                        }
+                        startIcon={el.id === optionId ? <DoneIcon /> : null}
+                        key={el.id}
+                        onClick={() => handleClick(el.id)}
+                        sx={{
+                          width: "100%",
+                          borderColor: "var(--lighter-purple)",
+                          color: "var(--text-gray)",
+                          textTransform: "capitalize",
+                          position: "relative",
+                          zIndex: 1,
+                          // Below is needed to change position of text inside button as MUI button uses inline-flex as display. If you don't use it will just display it in the center.
+                          // justifyContent: "flex-start",
+                        }}
                       >
-                        {pollData.options[index]?.voteCount}
-                      </span>
-                    )}
-                  </Button>
+                        {el.text}
+
+                        {showProgress && (
+                          <span
+                            className={css`
+                              position: absolute;
+                              right: 10px;
+                            `}
+                          >
+                            {pollData.options[index]?.voteCount}
+                          </span>
+                        )}
+                      </Button>
+                    </span>
+                  </Tooltip>
                 </div>
               ))}
             </div>

@@ -109,7 +109,6 @@ export const getPollById = async function (axiosInstance, pollId) {
   });
 
   if (res.data.status === "success") {
-    console.log(res);
     return res.data.data;
   }
 

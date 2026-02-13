@@ -7,12 +7,7 @@ import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 export function useCountVotesForPoll(pollId) {
   const axiosInstance = useAxiosPrivate();
 
-  const {
-    data: optionsWithVoteCount,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["countVotesForPoll", pollId],
     queryFn: () => countVotesForPollApi(axiosInstance, pollId),
   });
@@ -21,5 +16,5 @@ export function useCountVotesForPoll(pollId) {
     return { optionsWithVoteCount: [], isLoading, isError, error };
   }
 
-  return { optionsWithVoteCount, isLoading, isError, error };
+  return { optionsWithVoteCount: data || [], isLoading, isError, error };
 }
