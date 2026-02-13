@@ -5,14 +5,14 @@ import { css } from "@emotion/css";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import DoneIcon from "@mui/icons-material/Done";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Tooltip } from "@mui/material";
 
 import { useCastVote } from "../hooks/polls/useCastVote";
 import { useWhichOptionVoted } from "../hooks/polls/useWhichOptionVoted";
 import { useCountVotesForPoll } from "../hooks/polls/useCountVotesForPoll";
 import { useAxiosPrivate } from "../hooks/axios/useAxiosPrivate";
 
-function Poll({ question, options, byMe, pollId }) {
+function Poll({ poll, options, byMe, pollId, isLoggedIn }) {
   const axiosInstance = useAxiosPrivate();
 
   const { castVote } = useCastVote();
@@ -32,6 +32,8 @@ function Poll({ question, options, byMe, pollId }) {
   const overlayWidths = totalVotes
     ? optionsWithVoteCount.map((el) => (el.voteCount / totalVotes) * 100)
     : options.map(() => 0);
+
+  const toolTipTitle = isLoggedIn ? "" : "Login to vote";
 
   async function handleClick(optionId) {
     // tanstack query only accepts one argument and than passes it to corresponding api function.
@@ -69,7 +71,7 @@ function Poll({ question, options, byMe, pollId }) {
           gap: 2,
         }}
       >
-        <span>{question}</span>
+        <span>{poll.question}</span>
 
         {byMe && <Button size="sm">By Me</Button>}
       </Typography>
@@ -91,53 +93,63 @@ function Poll({ question, options, byMe, pollId }) {
                 width: 100%;
               `}
             >
-              <Button
-                sx={{
-                  display:
-                    showProgress || isLoadingOptionsWithVoteCount
-                      ? "block"
-                      : "none",
-                  position: "absolute",
-                  width: `${overlayWidths[index] || 0}%`,
-                  height: "100%",
-                  top: 0,
-                  left: 0,
-                  zIndex: 0,
-                  backgroundColor: "var(--lighter-purple)",
-                }}
-              ></Button>
+              <Tooltip title={toolTipTitle}>
+                <span>
+                  <Button
+                    key={index}
+                    sx={{
+                      display:
+                        showProgress || isLoadingOptionsWithVoteCount
+                          ? "block"
+                          : "none",
+                      position: "absolute",
+                      width: `${overlayWidths[index] || 0}%`,
+                      height: "100%",
+                      top: 0,
+                      left: 0,
+                      zIndex: 0,
+                      backgroundColor: "var(--lighter-purple)",
+                    }}
+                  ></Button>
 
-              <Button
-                variant="outlined"
-                disabled={byMe || isLoadingOptionId || el.id === optionId}
-                startIcon={el.id === optionId ? <DoneIcon /> : null}
-                key={el.id}
-                onClick={() => handleClick(el.id)}
-                sx={{
-                  width: "100%",
-                  borderColor: "var(--lighter-purple)",
-                  color: "var(--text-gray)",
-                  textTransform: "capitalize",
-                  position: "relative",
-                  zIndex: 1,
-                  // Below is needed to change position of text inside button as MUI button uses inline-flex as display. If you don't use it will just display it in the center.
-                  // justifyContent: "flex-start",
-                }}
-              >
-                {el.text}
-
-                {showProgress && (
-                  <span
-                    className={css`
-                      position: absolute;
-                      right: 10px;
-                    `}
+                  <Button
+                    variant="outlined"
+                    disabled={
+                      !isLoggedIn ||
+                      byMe ||
+                      isLoadingOptionId ||
+                      el.id === optionId
+                    }
+                    startIcon={el.id === optionId ? <DoneIcon /> : null}
+                    key={el.id}
+                    onClick={() => handleClick(el.id)}
+                    sx={{
+                      width: "100%",
+                      borderColor: "var(--lighter-purple)",
+                      color: "var(--text-gray)",
+                      textTransform: "capitalize",
+                      position: "relative",
+                      zIndex: 1,
+                      // Below is needed to change position of text inside button as MUI button uses inline-flex as display. If you don't use it will just display it in the center.
+                      // justifyContent: "flex-start",
+                    }}
                   >
-                    {!isLoadingOptionsWithVoteCount &&
-                      optionsWithVoteCount[index]?.voteCount}
-                  </span>
-                )}
-              </Button>
+                    {el.text}
+
+                    {showProgress && (
+                      <span
+                        className={css`
+                          position: absolute;
+                          right: 10px;
+                        `}
+                      >
+                        {!isLoadingOptionsWithVoteCount &&
+                          optionsWithVoteCount[index]?.voteCount}
+                      </span>
+                    )}
+                  </Button>
+                </span>
+              </Tooltip>
             </div>
           ))}
       </div>
