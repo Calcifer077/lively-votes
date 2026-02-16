@@ -1,5 +1,5 @@
-import { Outlet, useNavigate } from "react-router";
 import { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router";
 
 import Navbar from "../components/Navbar";
 import { useAuthContext } from "../context/AuthContext";

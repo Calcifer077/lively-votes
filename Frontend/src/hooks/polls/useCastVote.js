@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { castVote as castVoteApi } from "./../../services/apiPolls";
 
 export function useCastVote() {

@@ -1,4 +1,6 @@
 import { css } from "@emotion/css";
+import { useNavigate } from "react-router";
+
 import {
   Box,
   Button,
@@ -10,10 +12,10 @@ import {
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DoneIcon from "@mui/icons-material/Done";
 import CreateIcon from "@mui/icons-material/Create";
+
 import { useGetProfileData } from "../hooks/profile/useGetProfileData";
 import { useLogout } from "../hooks/authentication/useLogout";
 import { useAuthContext, useAuthContextDispatch } from "../context/AuthContext";
-import { useNavigate } from "react-router";
 import { useGetPollsUserHaveVotedIn } from "../hooks/profile/useGetPollsUserHaveVotedIn";
 
 import Poll from "../components/Poll";

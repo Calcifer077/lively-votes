@@ -4,10 +4,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import { Button } from "@mui/material";
 
-// import { useQuery } from "@tanstack/react-query";
-
 import Poll from "./Poll";
-// import { getAllPolls } from "../services/apiPolls";
+
 import { useAuthContext } from "../context/AuthContext";
 import { useGetPollsWithPagination } from "../hooks/polls/useGetPollsWithPagination";
 

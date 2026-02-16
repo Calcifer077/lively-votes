@@ -1,5 +1,6 @@
-import { getProfileData } from "../../services/apiUser";
 import { useQuery } from "@tanstack/react-query";
+
+import { getProfileData } from "../../services/apiUser";
 import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 
 export function useGetProfileData() {

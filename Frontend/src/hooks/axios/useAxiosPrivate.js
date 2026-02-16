@@ -1,10 +1,11 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
+
 import { AxiosInstance } from "../../services/apiConfig";
 import {
   useAuthContext,
   useAuthContextDispatch,
 } from "../../context/AuthContext";
-import { useNavigate } from "react-router";
 
 // How it works?
 // In the earlier version we used refresh token interceptors in apiConfig file.

@@ -1,12 +1,14 @@
 import { useState } from "react";
+
 import { css } from "@emotion/css";
+import toast from "react-hot-toast";
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { Typography, Box, Stack, Button } from "@mui/material";
+
 import TextField from "../ui/TextField";
 import { useCreatePoll } from "../hooks/polls/useCreatePoll";
-import toast from "react-hot-toast";
 
 export default function CreatePoll() {
   const { createPoll, isLoading } = useCreatePoll();

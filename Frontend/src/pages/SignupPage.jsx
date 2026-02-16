@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Box, Button, Typography, Link, Paper } from "@mui/material";
-import TextField from "../ui/TextField";
 import { useNavigate } from "react-router";
+
+import { Box, Button, Typography, Link, Paper } from "@mui/material";
+
+import TextField from "../ui/TextField";
 import { useSignup } from "../hooks/authentication/useSignup";
 import { useAuthContextDispatch } from "../context/AuthContext";
 

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPollsUserHaveVotedIn as getPollsUserHaveVotedInApi } from "../../services/apiUser";
+
 import { useAxiosPrivate } from "../axios/useAxiosPrivate";
+import { getPollsUserHaveVotedIn as getPollsUserHaveVotedInApi } from "../../services/apiUser";
 
 export function useGetPollsUserHaveVotedIn() {
   const axiosInstance = useAxiosPrivate();

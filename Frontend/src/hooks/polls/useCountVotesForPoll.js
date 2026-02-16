@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { countVotesForPoll as countVotesForPollApi } from "../../services/apiPolls";
+
 import { useAxiosPrivate } from "../axios/useAxiosPrivate";
+import { countVotesForPoll as countVotesForPollApi } from "../../services/apiPolls";
 
 // returns a array which contains votes for each option.
 // doesn't depend if the user is logged in or not.

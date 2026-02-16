@@ -1,5 +1,3 @@
-// import { AxiosInstance } from "./apiConfig";
-
 export const getProfileData = async function (axiosInstance) {
   const res = await axiosInstance({
     url: `/users/getUserData`,

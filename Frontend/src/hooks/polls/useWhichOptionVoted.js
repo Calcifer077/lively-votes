@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { whichOptionVoted } from "../../services/apiPolls";
+
 import { useAxiosPrivate } from "../axios/useAxiosPrivate";
+import { whichOptionVoted } from "../../services/apiPolls";
 import { useAuthContext } from "../../context/AuthContext";
 
 // returns the option id on which the user have voted for the given pollId

@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router";
+
 import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 import { getPollById as getPollByIdApi } from "../../services/apiPolls";
-import { useParams } from "react-router";
 
 // gets poll by Id from the backend.
 export const useGetPollById = function () {

@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getPollsWithPagination } from "../../services/apiPolls";
+
 import { useAxiosPrivate } from "../axios/useAxiosPrivate";
+import { getPollsWithPagination } from "../../services/apiPolls";
 
 export function useGetPollsWithPagination() {
   const axiosInstance = useAxiosPrivate();

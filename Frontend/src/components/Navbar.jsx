@@ -1,6 +1,6 @@
+import { useNavigate } from "react-router";
 import { AppBar, Box, Toolbar, Typography, Stack, Button } from "@mui/material";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
-import { useNavigate } from "react-router";
 
 import NavbarButton from "./NavbarButton";
 import { useAuthContext } from "../context/AuthContext";

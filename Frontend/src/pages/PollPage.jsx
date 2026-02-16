@@ -1,20 +1,13 @@
 import { css } from "@emotion/css";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import DoneIcon from "@mui/icons-material/Done";
+import { useParams } from "react-router";
 import toast from "react-hot-toast";
+
+import { Box, Button, CircularProgress } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
 
 import { useAuthContext } from "../context/AuthContext";
 import { useGetPollById } from "../hooks/polls/useGetPollById";
-import { useParams } from "react-router";
 import Poll from "../components/Poll";
-import { Suspense } from "react";
 
 function PollPage() {
   // To check if the user is logged in or not.

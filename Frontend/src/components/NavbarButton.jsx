@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 
+// If no function is provided it will just be a button without any click handler
 export default function NavbarButton({ children, onClick = () => {} }) {
   return (
     <Button
