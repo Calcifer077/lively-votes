@@ -2,6 +2,8 @@
 
 import { css } from "@emotion/css";
 
+import { useNavigate } from "react-router";
+
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import DoneIcon from "@mui/icons-material/Done";
@@ -14,6 +16,8 @@ import { useAxiosPrivate } from "../hooks/axios/useAxiosPrivate";
 
 function Poll({ poll, options, byMe, pollId, isLoggedIn }) {
   const axiosInstance = useAxiosPrivate();
+
+  const navigate = useNavigate();
 
   const { castVote } = useCastVote();
 
@@ -35,13 +39,24 @@ function Poll({ poll, options, byMe, pollId, isLoggedIn }) {
 
   const toolTipTitle = isLoggedIn ? "" : "Login to vote";
 
-  async function handleClick(optionId) {
+  // Responsbile for casting vote
+  async function handleCastVote(optionId) {
     // tanstack query only accepts one argument and than passes it to corresponding api function.
     await castVote({ axiosInstance, pollId, optionId });
 
     // will refetch data and rerender the component
     // queryClient.invalidateQueries({ queryKey: ["whichOptionVoted", pollId] });
     // queryClient.invalidateQueries({ queryKey: ["countVotesForPoll", pollId] });
+  }
+
+  // Responsible for redirecting to the poll
+  function handleClick(e) {
+    // will not redirect, when clicking on a button
+    if (e.target.closest("button")) {
+      return;
+    }
+
+    navigate(`/poll/${pollId}`);
   }
 
   return (
@@ -60,6 +75,7 @@ function Poll({ poll, options, byMe, pollId, isLoggedIn }) {
             rgba(196, 163, 255, 0.4) 0px 0px 20px 6px;
         }
       `}
+      onClick={(e) => handleClick(e)}
     >
       <Typography
         variant="subtitle1"
@@ -122,7 +138,7 @@ function Poll({ poll, options, byMe, pollId, isLoggedIn }) {
                     }
                     startIcon={el.id === optionId ? <DoneIcon /> : null}
                     key={el.id}
-                    onClick={() => handleClick(el.id)}
+                    onClick={() => handleCastVote(el.id)}
                     sx={{
                       width: "100%",
                       borderColor: "var(--lighter-purple)",
