@@ -155,7 +155,7 @@ export const getPollsWithPagination = catchAsync(
     let data = [];
 
     const page = req.params.page;
-    const numberOfRowsPerRes = 9;
+    const numberOfRowsPerRes = Number(process.env.NUMBER_OF_ROWS_PER_RES);
 
     // will store all the PollTable.id inside it which we have fetched.
     const pollIds = [];
