@@ -16,9 +16,10 @@ import CreateIcon from "@mui/icons-material/Create";
 import { useGetProfileData } from "../hooks/profile/useGetProfileData";
 import { useLogout } from "../hooks/authentication/useLogout";
 import { useAuthContext, useAuthContextDispatch } from "../context/AuthContext";
-import { useGetPollsUserHaveVotedIn } from "../hooks/profile/useGetPollsUserHaveVotedIn";
+// import { useGetPollsUserHaveVotedIn } from "../hooks/profile/useGetPollsUserHaveVotedIn";
 
 import Poll from "../components/Poll";
+import { useGetPollsUserHaveVotedInWithPagination } from "../hooks/profile/useGetPollsUserHaveVotedInWithPagination";
 
 function ProfilePage() {
   const { userId } = useAuthContext();
@@ -27,8 +28,13 @@ function ProfilePage() {
 
   const { data: profileData } = useGetProfileData();
   const { logout, isLoading: isLoadingLogout } = useLogout();
-  const { pollsUserHaveVotedIn, isLoading: isLoadingPollsUserHaveVotedIn } =
-    useGetPollsUserHaveVotedIn();
+  // const { pollsUserHaveVotedIn, isLoading: isLoadingPollsUserHaveVotedIn } =
+  // useGetPollsUserHaveVotedIn();
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+    useGetPollsUserHaveVotedInWithPagination();
+
+  console.log(data);
 
   const dispatch = useAuthContextDispatch();
 
@@ -44,6 +50,43 @@ function ProfilePage() {
     } catch (err) {
       console.log(err);
     }
+  }
+
+  if (status === "loading") {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress size={100} />
+      </Box>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Box
+        key={"error"}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "90vh",
+        }}
+      >
+        <h1
+          className={css`
+            font-size: 32px;
+          `}
+        >
+          Something went wrong. Please try again later.
+        </h1>
+      </Box>
+    );
   }
 
   return (
@@ -178,11 +221,10 @@ function ProfilePage() {
       >
         <Typography variant="h6">Recent Activity</Typography>
 
-        {isLoadingPollsUserHaveVotedIn && <CircularProgress />}
-
-        {!isLoadingPollsUserHaveVotedIn && (
-          <Grid container columns={10} spacing={4}>
-            {pollsUserHaveVotedIn?.map((el) => (
+        <Grid container columns={10} spacing={4}>
+          {data?.pages
+            .flatMap((page) => page?.data)
+            .map((el) => (
               <Grid size={5}>
                 <Poll
                   poll={el}
@@ -194,7 +236,46 @@ function ProfilePage() {
                 ></Poll>
               </Grid>
             ))}
-          </Grid>
+
+          {/* {pollsUserHaveVotedIn?.map((el) => (
+            <Grid size={5}>
+              <Poll
+                poll={el}
+                options={el.options}
+                byMe={userId && el.user_id === userId}
+                pollId={el.pollId}
+                key={el.pollId}
+                isLoggedIn={true}
+              ></Poll>
+            </Grid>
+          ))} */}
+        </Grid>
+
+        {hasNextPage && (
+          <Button
+            variant="outlined"
+            disabled={isFetchingNextPage}
+            onClick={fetchNextPage}
+            sx={{
+              display: "block",
+              margin: "auto",
+              border: "1.5px solid var(--text-gray)",
+              marginTop: "20px",
+              paddingLeft: "30px",
+              paddingRight: "30px",
+              color: "var(--dark-gray)",
+              "&:hover": {
+                backgroundColor: "var(--hover-indigo)",
+                color: "var(--light-gray)",
+              },
+              "&:active": {
+                backgroundColor: "var(--active-indigo)",
+                color: "var(--light-gray)",
+              },
+            }}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </Button>
         )}
       </Box>
     </div>
