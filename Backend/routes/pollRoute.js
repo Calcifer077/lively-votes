@@ -8,7 +8,7 @@ import {
   getPollbyId,
   getPollsWithPagination,
   whichOptionVoted,
-} from "../controllers/mainController.js";
+} from "../controllers/pollController.js";
 import { protect } from "../controllers/authController.js";
 
 const router = express();
