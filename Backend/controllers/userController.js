@@ -183,8 +183,8 @@ export const getPollsUserHaveVotedInWithPagination = catchAsync(
       .select({ pollId: VoteTable.poll_id })
       .from(VoteTable)
       .where(eq(VoteTable.user_id, userId))
-      .limit(10)
-      .offset(5)
+      .limit(numberOfRowsPerRes)
+      .offset((page - 1) * numberOfRowsPerRes)
       .as("sq");
 
     // Get all the required data.
@@ -235,17 +235,5 @@ export const getPollsUserHaveVotedInWithPagination = catchAsync(
       totalRows: totalRowsInResult.count,
       totalPages: Math.ceil(totalRowsInResult.count / numberOfRowsPerRes),
     });
-
-    // format of data to be returned
-    /*
-      res.status(200).json({
-        status: "success",
-      data: data,
-      page: Number(page),
-      rowsPerPage: numberOfRowsPerRes,
-      totalRows: totalRowsInResult.count,
-      totalPages: Math.ceil(totalRowsInPollTable.count / numberOfRowsPerRes),
-      })
-    */
   },
 );
