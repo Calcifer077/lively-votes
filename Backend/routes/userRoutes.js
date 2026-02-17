@@ -10,6 +10,7 @@ import {
 import {
   getUserData,
   getPollsUserHaveVotedIn,
+  getPollsUserHaveVotedInWithPagination,
 } from "../controllers/userController.js";
 
 const router = express();
@@ -23,5 +24,8 @@ router.use(protect);
 
 router.route("/getUserData").get(getUserData);
 router.route("/getPollsUserHaveVotedIn").get(getPollsUserHaveVotedIn);
+router
+  .route("/getPollsUserHaveVotedInWithPagination/:page")
+  .get(getPollsUserHaveVotedInWithPagination);
 
 export default router;

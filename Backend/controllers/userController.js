@@ -162,3 +162,90 @@ export const getPollsUserHaveVotedIn = catchAsync(
     });
   },
 );
+
+// This is the updated version of above function with pagination
+export const getPollsUserHaveVotedInWithPagination = catchAsync(
+  async function (req, res, next) {
+    const userId = res.user.id;
+
+    const page = req.params.page;
+    const numberOfRowsPerRes = Number(process.env.NUMBER_OF_ROWS_PER_RES);
+
+    const [totalRowsInResult] = await db
+      .select({ count: count() })
+      .from(VoteTable)
+      .where(eq(VoteTable.user_id, userId));
+
+    // This is a subquery, you don't await a subquery, it will be run when you await the main query
+    // This query is responsible for getting all the polls user have voted in.
+    // We have only selected pollId, because it is the only thing needed by the main query
+    const sq = db
+      .select({ pollId: VoteTable.poll_id })
+      .from(VoteTable)
+      .where(eq(VoteTable.user_id, userId))
+      .limit(10)
+      .offset(5)
+      .as("sq");
+
+    // Get all the required data.
+    const results = await db
+      .select({
+        pollId: PollTable.id,
+        question: PollTable.question,
+        optionId: OptionTable.id,
+        optionText: OptionTable.text,
+      })
+      .from(sq)
+      .innerJoin(PollTable, eq(sq.pollId, PollTable.id))
+      .innerJoin(OptionTable, eq(PollTable.id, OptionTable.poll_id))
+      .orderBy(PollTable.id, OptionTable.id);
+
+    // Format data for frontend, using reduce
+    // How this works?
+    // It will go through the above result, and form a nested array of polls, with options
+    // 'acc' is the accumulator, which is the array that is returned by previous callback, 'row' is the current row
+    // last [] is the initial value
+    const dataToReturn = results.reduce((acc, row) => {
+      let poll = acc.find((p) => p.pollId === row.pollId);
+
+      // If it isn't found, meaning that this is the first time we are encountering this poll, so add a new poll else just update the already existing poll.
+      if (!poll) {
+        poll = {
+          pollId: row.pollId,
+          question: row.question,
+          options: [],
+        };
+
+        acc.push(poll);
+      }
+
+      poll.options.push({
+        id: row.optionId,
+        text: row.optionText,
+      });
+
+      return acc;
+    }, []);
+
+    res.status(200).json({
+      status: "success",
+      data: dataToReturn,
+      page: Number(page),
+      rowsPerPage: numberOfRowsPerRes,
+      totalRows: totalRowsInResult.count,
+      totalPages: Math.ceil(totalRowsInResult.count / numberOfRowsPerRes),
+    });
+
+    // format of data to be returned
+    /*
+      res.status(200).json({
+        status: "success",
+      data: data,
+      page: Number(page),
+      rowsPerPage: numberOfRowsPerRes,
+      totalRows: totalRowsInResult.count,
+      totalPages: Math.ceil(totalRowsInPollTable.count / numberOfRowsPerRes),
+      })
+    */
+  },
+);
