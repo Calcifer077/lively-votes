@@ -50,8 +50,6 @@ export default function SignupPage() {
     }
 
     setError(false);
-    console.log("Signup submitted:", form);
-    // TODO: connect to backend or Firebase
   }
 
   return (

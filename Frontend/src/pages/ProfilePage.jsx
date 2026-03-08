@@ -34,8 +34,6 @@ function ProfilePage() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useGetPollsUserHaveVotedInWithPagination();
 
-  console.log(data);
-
   const dispatch = useAuthContextDispatch();
 
   async function handleLogout() {

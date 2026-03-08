@@ -74,8 +74,8 @@ io.on("connection", (socket) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.log("This error was caught by express.");
-  console.log(err);
+  // console.log("This error was caught by express.");
+  // console.log(err);
 
   // In case of expired token, return a 401
   // Axios on frontend will intercept this and try to refresh the token.

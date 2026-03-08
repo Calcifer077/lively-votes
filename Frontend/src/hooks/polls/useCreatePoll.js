@@ -21,7 +21,7 @@ export function useCreatePoll() {
       toast.success("Poll created successfully");
     },
     onError: (err) => {
-      console.log(err);
+      // console.log(err);
       toast.error(err.response.data.message);
     },
   });
