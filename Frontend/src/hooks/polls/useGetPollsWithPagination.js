@@ -18,7 +18,7 @@ export function useGetPollsWithPagination() {
     queryKey: ["polls"],
     queryFn: ({ pageParam = 1 }) =>
       getPollsWithPagination({ axiosInstance, pageParam }),
-    getNextPageParam: (axiosInstance, lastPage) => {
+    getNextPageParam: (lastPage) => {
       let currPage = lastPage.page;
       let totalPages = lastPage.totalPages;
 

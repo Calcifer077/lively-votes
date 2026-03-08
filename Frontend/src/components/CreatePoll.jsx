@@ -9,8 +9,10 @@ import { Typography, Box, Stack, Button } from "@mui/material";
 
 import TextField from "../ui/TextField";
 import { useCreatePoll } from "../hooks/polls/useCreatePoll";
+import { useAxiosPrivate } from "../hooks/axios/useAxiosPrivate";
 
 export default function CreatePoll() {
+  const axiosInstance = useAxiosPrivate();
   const { createPoll, isLoading } = useCreatePoll();
 
   // By default only 3 things are required, formQuestion and 2 options, if the user adds any more options and leave them blank, than we will just ignore those options.
@@ -75,7 +77,7 @@ export default function CreatePoll() {
       options: pollOptions.filter((option) => option.trim() !== ""),
     };
 
-    await createPoll(dataToSubmit);
+    await createPoll({ axiosInstance, dataToSubmit });
   }
 
   return (

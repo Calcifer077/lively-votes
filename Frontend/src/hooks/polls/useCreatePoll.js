@@ -1,12 +1,10 @@
 import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useAxiosPrivate } from "../axios/useAxiosPrivate";
 import { createPoll as createPollApi } from "../../services/apiPolls";
 
 export function useCreatePoll() {
   const queryClient = useQueryClient();
-  const axiosInstance = useAxiosPrivate();
 
   const {
     mutateAsync: createPoll,
@@ -14,7 +12,7 @@ export function useCreatePoll() {
     isError,
     error,
   } = useMutation({
-    mutationFn: () => createPollApi(axiosInstance),
+    mutationFn: createPollApi,
     onSuccess: () => {
       queryClient.invalidateQueries(["polls"]);
 

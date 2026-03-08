@@ -29,8 +29,8 @@ export const getPollsWithPagination = async function ({
   return null;
 };
 
-export const createPoll = async function (axiosInstance, data) {
-  const { question, options } = data;
+export const createPoll = async function ({ axiosInstance, dataToSubmit }) {
+  const { question, options } = dataToSubmit;
 
   const optionsToSend = [];
 
