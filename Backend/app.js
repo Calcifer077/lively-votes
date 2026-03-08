@@ -12,12 +12,10 @@ import userRouter from "./routes/userRoutes.js";
 const app = express();
 const httpServer = createServer(app);
 
-const allowedOrigins = [
-  "https://lively-votes-gcdm2ih6c-maheshs-projects-0091caae.vercel.app",
-  "https://lively-votes.vercel.app",
-  "http://localhost:3000",
-  "http://localhost:5173",
-];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean); // remove empty entries
 
 app.use(
   cors({
