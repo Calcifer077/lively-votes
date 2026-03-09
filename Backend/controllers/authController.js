@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { UsersTable } from "../db/schema.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import { supabase } from "../utils/supabase.js";
 
 const db = drizzle(process.env.DATABASE_URL);
 
@@ -120,18 +121,26 @@ async function createUser(user) {
 // Number of hashing rounds.
 const saltRounds = 5;
 
-export const signUp = catchAsync(async function (req, res, next) {
-  // What to do?
-  // 1. Get data from the user
+function setRefreshTokenInCookie(token, res) {
+  const cookieOption = {
+    expires: new Date(
+      Date.now() + Number(refreshTokenExpiresIn) * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true,
+  };
+
+  res.cookie("refreshToken", token, cookieOption);
+
+  return token;
+}
+
+export const signUpWithSupabase = catchAsync(async function (req, res, next) {
   const { name, email, password } = req.body;
 
-  // The email given is invalid.
   if (!validateEmail(email)) {
     return next(new AppError("Email is invalid", 401));
   }
 
-  // 2. Feed data into the database with encrypted password
-  // Hash the password and send to database.
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   const user = {
@@ -142,27 +151,27 @@ export const signUp = catchAsync(async function (req, res, next) {
 
   const userThatWasCreated = await createUser(user);
 
-  const payloadForToken = {
-    id: userThatWasCreated.id,
-    email: userThatWasCreated.email,
-  };
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
-  // 3. Create a jwt and send with the request
-  // const token = createAndSendToken(payloadForToken, res);
-  const accessToken = createAcessToken(payloadForToken);
-  const refreshToken = createRefreshToken(payloadForToken, res);
+  if (error) {
+    return res.status(400).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+
+  setRefreshTokenInCookie(data.session.refresh_token, res);
 
   res.status(201).json({
     status: "success",
-    accessToken,
-    refreshToken,
+    accessToken: data.session.access_token,
     data: {
       user: userThatWasCreated,
     },
   });
 });
 
-export const login = catchAsync(async function (req, res, next) {
+export const loginWithSupabase = catchAsync(async function (req, res, next) {
   // Get data from the body.
   const { email, password } = req.body;
 
@@ -191,28 +200,23 @@ export const login = catchAsync(async function (req, res, next) {
     return next(new AppError("There is no user with this email ID", 401));
   }
 
-  const passwordComparison = await bcrypt.compare(
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
     password,
-    userFromDatabase.password,
-  );
+  });
 
-  if (!passwordComparison) {
-    return next(new AppError("Provided password is incorrect", 401));
+  if (error) {
+    return res.status(400).json({
+      status: "error",
+      message: error.message,
+    });
   }
-  const payloadForToken = {
-    id: userFromDatabase.id,
-    email: userFromDatabase.email,
-  };
 
-  // 3. Create a jwt and send with the request
-  // Will create access token and send it with response
-  const accessToken = createAcessToken(payloadForToken);
-  // Will create refresh token and set it as cookie
-  createRefreshToken(payloadForToken, res);
+  setRefreshTokenInCookie(data.session.refresh_token, res);
 
-  res.status(200).json({
+  return res.status(200).json({
     status: "success",
-    accessToken,
+    accessToken: data.session.access_token,
     data: {
       user: userFromDatabase,
     },
@@ -225,6 +229,7 @@ export const login = catchAsync(async function (req, res, next) {
 // Try to find a user using this refresh token, if the user is found.
 // Send new access and refresh token
 export const refresh = catchAsync(async function (req, res, next) {
+  // const token = req.params.refreshToken;
   let token;
 
   if (req.cookies.refreshToken) {
@@ -237,7 +242,13 @@ export const refresh = catchAsync(async function (req, res, next) {
   }
 
   // 2. verify token
-  const decoded = verfiyRefreshToken(token);
+  const { data, error } = await supabase.auth.refreshSession({
+    refresh_token: token,
+  });
+
+  console.log("route hit");
+
+  const userEmail = data.user.email;
 
   const [userFromDatabase] = await db
     .select({
@@ -245,27 +256,17 @@ export const refresh = catchAsync(async function (req, res, next) {
       email: UsersTable.email,
     })
     .from(UsersTable)
-    .where(eq(UsersTable.id, decoded.id));
+    .where(eq(UsersTable.email, userEmail));
 
   if (!userFromDatabase) {
     return next(new AppError("Something went wrong. Please login again.", 401));
   }
 
-  // get new access and refresh token
-  const payloadForToken = {
-    id: userFromDatabase.id,
-    email: userFromDatabase.email,
-  };
+  setRefreshTokenInCookie(data.session.refresh_token, res);
 
-  // Create new access and refresh token
-  // Will create access token and send it with response
-  const accessToken = createAcessToken(payloadForToken);
-  // Will create refresh token and set it as cookie
-  createRefreshToken(payloadForToken, res);
-
-  res.status(200).json({
+  return res.status(200).json({
     status: "success",
-    accessToken,
+    accessToken: data.session.access_token,
     data: {
       user: userFromDatabase,
     },
@@ -290,7 +291,13 @@ export const protect = catchAsync(async function (req, res, next) {
   }
 
   // 2. verify token
-  const decoded = verfiyAcessToken(token);
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  const userEmail = data.user.email;
 
   const [userFromDatabase] = await db
     .select({
@@ -298,7 +305,7 @@ export const protect = catchAsync(async function (req, res, next) {
       email: UsersTable.email,
     })
     .from(UsersTable)
-    .where(eq(UsersTable.id, decoded.id));
+    .where(eq(UsersTable.email, userEmail));
 
   if (!userFromDatabase) {
     return next(new AppError("Something went wrong. Please login again.", 401));
@@ -314,6 +321,15 @@ export const logout = catchAsync(async function (req, res, next) {
   res.cookie("jwt", "loggedout");
 
   res.setHeader("authorization", " ");
+
+  // 'global' means sign out of all active sessions.
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+
+  if (error) {
+    return res
+      .status(401)
+      .json({ error: "Something went wrong. Please try again." });
+  }
 
   // 2. Send response
   res.status(200).json({

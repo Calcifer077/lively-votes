@@ -1,10 +1,10 @@
 import express from "express";
 import {
-  signUp,
-  login,
   protect,
   logout,
   refresh,
+  signUpWithSupabase,
+  loginWithSupabase,
 } from "../controllers/authController.js";
 
 import {
@@ -15,8 +15,10 @@ import {
 
 const router = express();
 
-router.route("/signup").post(signUp);
-router.route("/login").post(login);
+// router.route("/signup").post(signUp);
+router.route("/signup").post(signUpWithSupabase);
+// router.route("/login").post(login);
+router.route("/login").post(loginWithSupabase);
 router.route("/logout").get(logout);
 router.route("/refresh").get(refresh);
 
