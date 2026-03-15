@@ -246,8 +246,6 @@ export const refresh = catchAsync(async function (req, res, next) {
     refresh_token: token,
   });
 
-  console.log("route hit");
-
   const userEmail = data.user.email;
 
   const [userFromDatabase] = await db
@@ -335,5 +333,77 @@ export const logout = catchAsync(async function (req, res, next) {
   res.status(200).json({
     message: "success",
     token: null,
+  });
+});
+
+// responsible for sending mail after forgetting password
+export const forgotPassword = catchAsync(async function (req, res, next) {
+  const email = req.body.email;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "http://localhost:5173/reset-password", // Must match added redirect URL
+  });
+
+  if (error) {
+    // Don't reveal if email exists → always 200 OK in production
+    return res.status(200).json({
+      status: "success",
+      message: {
+        message: "Reset email sent if account exists",
+      },
+    });
+  }
+
+  return res.status(200).json({
+    status: "success",
+    message: {
+      message: "Reset email sent if account exists",
+    },
+  });
+});
+
+// responsible for resetting password
+// How resetting password works?
+// 1. get access and refresh token
+// 2. update password
+// Why do we need access and refresh token, because you need to create a session before updating the password.
+// Both access and refresh token are appended in the reset url link by supabase, you need to get them from the URL.
+// After setting session we can simply update the password.
+export const resetPassword = catchAsync(async function (req, res, next) {
+  const { password, access_token, refresh_token } = req.body;
+
+  if (!access_token || !refresh_token) {
+    return res.status(401).json({
+      status: "error",
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token,
+    refresh_token,
+  });
+
+  if (sessionError) {
+    return res.status(401).json({
+      status: "error",
+      message: "Invalid or expired session. Please log in again.",
+    });
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    return res.status(401).json({
+      status: "error",
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Password updated successfully",
   });
 });

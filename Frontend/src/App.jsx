@@ -13,6 +13,8 @@ import SignupPage from "./pages/SignupPage";
 import AppLayout from "./pages/AppLayout";
 import ProfilePage from "./pages/ProfilePage";
 import PollPage from "./pages/PollPage";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 
 import { AuthProvider } from "./context/AuthContext";
 
@@ -66,6 +68,11 @@ export default function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
                   </Route>
                 </Routes>
               </AuthProvider>

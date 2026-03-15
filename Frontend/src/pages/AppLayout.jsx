@@ -17,7 +17,9 @@ function AppLayout() {
       if (
         !location.pathname.startsWith("/signup") &&
         !location.pathname.startsWith("/login") &&
-        !location.pathname.startsWith("/poll")
+        !location.pathname.startsWith("/poll") &&
+        !location.pathname.startsWith("/reset-password") &&
+        !location.pathname.startsWith("/forgot-password")
       ) {
         navigate("/signup", { replace: true });
       }

@@ -5,6 +5,8 @@ import {
   refresh,
   signUpWithSupabase,
   loginWithSupabase,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authController.js";
 
 import {
@@ -21,6 +23,8 @@ router.route("/signup").post(signUpWithSupabase);
 router.route("/login").post(loginWithSupabase);
 router.route("/logout").get(logout);
 router.route("/refresh").get(refresh);
+router.route("/forgotPassword").post(forgotPassword);
+router.route("/resetPassword").post(resetPassword);
 
 router.use(protect);
 

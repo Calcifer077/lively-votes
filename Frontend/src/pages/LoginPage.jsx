@@ -55,12 +55,10 @@ export default function LoginPage() {
   return (
     <Box
       sx={{
-        height: "100vh",
+        height: "90vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: `radial-gradient(circle at 30% 70%, rgba(173, 216, 230, 0.35), transparent 60%),
-                     radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.4), transparent 60%)`,
       }}
     >
       <Paper
@@ -99,6 +97,19 @@ export default function LoginPage() {
             error={error && !form.password}
             helperText={error && !form.password ? "Password is required" : ""}
           />
+
+          <Link
+            underline="hover"
+            onClick={() => navigate("/forgot-password")}
+            sx={{
+              display: "block",
+              mt: 2,
+              textAlign: "right",
+              cursor: "pointer",
+            }}
+          >
+            Forgot Password?
+          </Link>
 
           <Button
             type="submit"

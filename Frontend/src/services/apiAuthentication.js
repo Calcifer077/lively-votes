@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { AxiosInstance } from "./apiConfig.js";
 
 export const loginUser = async function (data) {
@@ -56,6 +57,44 @@ export const logoutUser = async function () {
   const res = await AxiosInstance({
     url: "/users/logout",
     method: "get",
+  });
+
+  if (res.data.status === "success") {
+    return true;
+  }
+
+  return false;
+};
+
+export const forgotPassword = async function (email) {
+  const res = await AxiosInstance({
+    url: "/users/forgotPassword",
+    method: "post",
+    data: {
+      email,
+    },
+  });
+
+  if (res.data.status === "success") {
+    toast.success("A email with reset password link has been sent to you");
+  }
+
+  return null;
+};
+
+export const resetPassword = async function ({
+  password,
+  access_token,
+  refresh_token,
+}) {
+  const res = await AxiosInstance({
+    url: "/users/resetPassword",
+    method: "post",
+    data: {
+      password,
+      access_token,
+      refresh_token,
+    },
   });
 
   if (res.data.status === "success") {
