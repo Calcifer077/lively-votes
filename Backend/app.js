@@ -1,8 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-// import { rateLimit } from "express-rate-limit";
-// import { slowDown } from "express-slow-down";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 
@@ -26,7 +24,7 @@ app.use(
   }),
 );
 
-// Explicit preflight for everything (Socket.IO polling loves this)
+// Explicit preflight for everything
 // app.options("*", cors());
 
 export const io = new Server(httpServer, {
@@ -40,24 +38,8 @@ export const io = new Server(httpServer, {
 
 const port = 3000;
 
-// Slow down our server after too many requests
-// const slowDownLimiter = slowDown({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   delayAfter: 5, // Allow 5 requests per 15 minutes.
-//   delayMs: (hits) => hits * 100,
-// });
-
-// Rate limiting our server.
-// right now -> 2 requests per user under 15 minutes
-// const rateLimiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   limit: 2,
-// });
-
 app.use(express.json());
 app.use(cookieParser());
-// app.use(slowDownLimiter);
-// app.use(rateLimiter);
 
 app.use("/api/v1/polls", pollRouter);
 app.use("/api/v1/users", userRouter);
