@@ -10,6 +10,14 @@ import userRouter from "./routes/userRoutes.js";
 const app = express();
 const httpServer = createServer(app);
 
+// health route
+app.get("/health", cors(), (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
