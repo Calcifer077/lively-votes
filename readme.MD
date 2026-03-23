@@ -24,6 +24,7 @@ Real-time polling application built to learn and experiment with **WebSockets**.
 Special things I implemented (many for the first time):
 
 - Supabase Authentication (email/password + refresh tokens handled by Supabase)
+- SMTP server by Google used by Supabase for sending emails
 - Material-UI component library
 - Optimistic updates for voting
 - Infinite scrolling / pagination for polls list (TanStack Query)
@@ -156,8 +157,10 @@ Feel free to open issues / PRs!
 lively-votes/
 ├── Backend/
 │   ├── .gitignore
+│   ├── .env
 │   ├── app.js
 │   ├── controllers/
+│   │   ├── authController-old.js
 │   │   ├── authController.js
 │   │   ├── pollController.js
 │   │   └── userController.js
@@ -173,9 +176,11 @@ lively-votes/
 │   └── utils/
 │       ├── appError.js
 │       ├── catchAsync.js
+│       ├── rateLimiter.js
 │       └── supabase.js
 └── Frontend/
     ├── .gitignore
+    ├── .env
     ├── eslint.config.js
     ├── index.html
     ├── package-lock.json
@@ -197,8 +202,10 @@ lively-votes/
     │   │   └── AuthContext.jsx
     │   ├── hooks/
     │   │   ├── authentication/
+    │   │   │   ├── useForgotPassword.js
     │   │   │   ├── useLogin.js
     │   │   │   ├── useLogout.js
+    │   │   │   ├── useResetPassword.js
     │   │   │   └── useSignup.js
     │   │   ├── axios/
     │   │   │   └── useAxiosPrivate.js
@@ -219,9 +226,11 @@ lively-votes/
     │   ├── main.jsx
     │   ├── pages/
     │   │   ├── AppLayout.jsx
+    │   │   ├── ForgotPassword.jsx
     │   │   ├── LoginPage.jsx
     │   │   ├── PollPage.jsx
     │   │   ├── ProfilePage.jsx
+    │   │   ├── ResetPassword.jsx
     │   │   └── SignupPage.jsx
     │   ├── services/
     │   │   ├── apiAuthentication.js
